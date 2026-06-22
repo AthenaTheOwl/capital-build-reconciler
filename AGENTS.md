@@ -30,16 +30,15 @@ These roles exist in spec ledger; not all are implemented in v0.
 
 - Plain assertion. The pillar verdicts are the load-bearing claim; the
   prose around them is scaffolding.
-- No marketing words. No "leverage", "synergy", "seamless",
-  "best-in-class".
+- No marketing jargon. Verdict language stays literal.
 - No antithetical-reversal structure. Each pillar verdict is a single
   flat claim plus the evidence behind it.
 - Honest about uncertainty. If three months of telemetry is too thin
   to score a pillar, the memo says so and abstains.
 
-## Gates (will land in spec 0002)
+## Gates
 
-The intended local-gate chain:
+The local-gate chain:
 
 ```bash
 python -m pytest

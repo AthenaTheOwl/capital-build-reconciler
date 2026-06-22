@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://athenatheowl.local/capital-build-reconciler/monthly_memo.schema.json",
+  "title": "Capital Build Reconciler Monthly Memo",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "month",
+    "generated_at",
+    "pillars"
+  ],
+  "properties": {
+    "month": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pillars": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "foundry",
+        "advanced-packaging",
+        "hbm-memory",
+        "networking",
+        "power",
+        "cooling"
+      ],
+      "properties": {
+        "foundry": {
+          "$ref": "#/$defs/pillar_verdict"
+        },
+        "advanced-packaging": {
+          "$ref": "#/$defs/pillar_verdict"
+        },
+        "hbm-memory": {
+          "$ref": "#/$defs/pillar_verdict"
+        },
+        "networking": {
+          "$ref": "#/$defs/pillar_verdict"
+        },
+        "power": {
+          "$ref": "#/$defs/pillar_verdict"
+        },
+        "cooling": {
+          "$ref": "#/$defs/pillar_verdict"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "pillar_verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verdict",
+        "evidence",
+        "revert_threshold"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "HOLD",
+            "UPWEIGHT",
+            "TRIM",
+            "ABSTAIN"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "revert_threshold": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

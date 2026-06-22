@@ -1,0 +1,18 @@
+foundry:
+  display_name: Foundry capacity
+  scoring_window_months: 3
+advanced-packaging:
+  display_name: Advanced packaging
+  scoring_window_months: 3
+hbm-memory:
+  display_name: HBM memory
+  scoring_window_months: 3
+networking:
+  display_name: Networking
+  scoring_window_months: 3
+power:
+  display_name: Power
+  scoring_window_months: 3
+cooling:
+  display_name: Cooling
+  scoring_window_months: 3
