@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from .ingest.helicone import ingest
+
+# repo root is two parents up from this file: src/capital_reconcile/cli.py
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_SCHEMAS_DIR = _REPO_ROOT / "schemas"
 
 
 def _ingest(args: argparse.Namespace) -> int:
@@ -14,6 +19,67 @@ def _ingest(args: argparse.Namespace) -> int:
 
 def _not_implemented(command: str) -> int:
     raise NotImplementedError(f"{command} is reserved for a later PR")
+
+
+def _validate_bundled_schemas() -> int:
+    """No-arg canonical check: assert the committed JSON schemas are well-formed.
+
+    Read-only, no network, no writes. This is the first user action and only
+    touches committed artifacts in ``schemas/``.
+    """
+    from jsonschema import Draft202012Validator
+
+    schema_files = sorted(_SCHEMAS_DIR.glob("*.schema.json"))
+    if not schema_files:
+        print(f"validate: no schemas found under {_SCHEMAS_DIR}")
+        return 1
+
+    errors: list[str] = []
+    for path in schema_files:
+        try:
+            Draft202012Validator.check_schema(json.loads(path.read_text(encoding="utf-8")))
+        except Exception as exc:  # jsonschema raises several error types
+            errors.append(f"{path.name}: invalid JSON Schema: {exc}")
+
+    if errors:
+        print("\n".join(errors))
+        return 1
+
+    print(f"validate: ok ({len(schema_files)} bundled schemas well-formed)")
+    return 0
+
+
+def _validate_memo(memo: Path) -> int:
+    """Validate a memo's YAML front matter against the monthly_memo schema."""
+    import yaml
+    from jsonschema import Draft202012Validator, FormatChecker
+
+    schema = json.loads((_SCHEMAS_DIR / "monthly_memo.schema.json").read_text(encoding="utf-8"))
+    text = memo.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        print(f"validate: {memo}: missing YAML front matter")
+        return 1
+    end = text.find("\n---", 4)
+    if end == -1:
+        print(f"validate: {memo}: unterminated YAML front matter")
+        return 1
+    data = yaml.load(text[4:end], Loader=yaml.BaseLoader)
+
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    errors = [error.message for error in validator.iter_errors(data)]
+    if errors:
+        for msg in errors:
+            print(f"validate: {memo}: {msg}")
+        return 1
+
+    print(f"validate: ok ({memo})")
+    return 0
+
+
+def _validate(args: argparse.Namespace) -> int:
+    if args.memo is None:
+        return _validate_bundled_schemas()
+    return _validate_memo(args.memo)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -33,9 +99,18 @@ def build_parser() -> argparse.ArgumentParser:
     score_parser.add_argument("--out", type=Path, required=True)
     score_parser.set_defaults(func=lambda _args: _not_implemented("score"))
 
-    validate_parser = subparsers.add_parser("validate", help="reserved memo validator surface")
-    validate_parser.add_argument("memo", type=Path)
-    validate_parser.set_defaults(func=lambda _args: _not_implemented("validate"))
+    validate_parser = subparsers.add_parser(
+        "validate",
+        help="validate committed artifacts; with no memo, check the bundled schemas",
+    )
+    validate_parser.add_argument(
+        "memo",
+        type=Path,
+        nargs="?",
+        default=None,
+        help="optional memo to validate; defaults to the bundled schemas when omitted",
+    )
+    validate_parser.set_defaults(func=_validate)
 
     return parser
 
