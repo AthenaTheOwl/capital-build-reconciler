@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://athenatheowl.local/capital-build-reconciler/normalized_event.schema.json",
+  "title": "Capital Build Reconciler Normalized Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "timestamp",
+    "provider",
+    "model",
+    "region",
+    "latency_ms",
+    "rate_limit_hit",
+    "cost_usd",
+    "prompt_tokens",
+    "output_tokens"
+  ],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "anthropic"
+      ]
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "latency_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rate_limit_hit": {
+      "type": "boolean"
+    },
+    "cost_usd": {
+      "type": "number",
+      "minimum": 0
+    },
+    "prompt_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "output_tokens": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

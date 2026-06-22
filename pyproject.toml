@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "capital-build-reconciler"
+version = "0.0.2"
+description = "Monthly reconciliation pipeline for build telemetry and AI-infra capital pillars"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "pydantic>=2",
+  "pyyaml>=6",
+  "jsonschema>=4.22",
+  "pyarrow>=15",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+]
+
+[project.scripts]
+capital-reconcile = "capital_reconcile.cli:main"
+capital-build-reconciler = "capital_build_reconciler.cli:main"
+
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/capital_reconcile", "capital_build_reconciler"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "--basetemp=.pytest-tmp"

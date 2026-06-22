@@ -26,20 +26,28 @@ for the portfolio.
 
 ## Status
 
-v0 scaffold. No implementation yet. Specs in `specs/0001-foundation/`
-name the schema and the first monthly memo. PR 0002 will land the
-telemetry ingester for one provider (Anthropic via Helicone-style logs)
-and the empty pillar template.
+v0.0.2 foundation. Specs in `specs/0001-foundation/` name the schema
+and the first monthly memo. The repo now includes schemas, pillar
+config, validators, and a Helicone-style ingester for Anthropic logs.
 
 ## How to run
 
-Placeholder. Will land in spec 0002. The intended invocation:
+Run the fixture ingest path:
 
 ```bash
-python -m capital_reconcile ingest --provider anthropic --month 2026-06
-python -m capital_reconcile reconcile --month 2026-06 \
-  --pillars config/pillars.yaml \
-  --out capital_reconcile/2026-M06.md
+python -m capital_build_reconciler ingest \
+  --provider anthropic \
+  --raw tests/fixtures \
+  --out reports/2026-M06.fixture.parquet
+```
+
+The installed console entry delegates to the same parser:
+
+```bash
+capital-reconcile ingest \
+  --provider anthropic \
+  --raw tests/fixtures \
+  --out reports/2026-M06.fixture.parquet
 ```
 
 ## Layout
@@ -58,8 +66,12 @@ capital-build-reconciler/
       acceptance.md
   docs/
     first-pr.md
-  config/                # arrives in PR 0002
-  src/                   # arrives in PR 0002
+  reports/
+    2026-M06-ingest-summary.jsonl
+  capital_build_reconciler/
+  config/
+  src/
+    capital_reconcile/
   capital_reconcile/     # written monthly memos land here
 ```
 
