@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .ingest.helicone import ingest
+from .show import show
 
 # repo root is two parents up from this file: src/capital_reconcile/cli.py
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -15,6 +16,10 @@ def _ingest(args: argparse.Namespace) -> int:
     events = ingest(args.raw, args.out)
     print(f"wrote {len(events)} normalized events to {args.out}")
     return 0
+
+
+def _show(_args: argparse.Namespace) -> int:
+    return show()
 
 
 def _not_implemented(command: str) -> int:
@@ -91,6 +96,12 @@ def build_parser() -> argparse.ArgumentParser:
     ingest_parser.add_argument("--raw", type=Path, required=True)
     ingest_parser.add_argument("--out", type=Path, required=True)
     ingest_parser.set_defaults(func=_ingest)
+
+    show_parser = subparsers.add_parser(
+        "show",
+        help="print a readable, ranked per-region view of the committed telemetry",
+    )
+    show_parser.set_defaults(func=_show)
 
     score_parser = subparsers.add_parser("score", help="reserved scorer surface")
     score_parser.add_argument("--month", required=True)

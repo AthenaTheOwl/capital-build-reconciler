@@ -50,6 +50,38 @@ capital-reconcile ingest \
   --out reports/2026-M06.fixture.parquet
 ```
 
+## show
+
+Print a readable, ranked per-region view of the committed telemetry
+(no args, read-only, offline):
+
+```bash
+python -m capital_reconcile show
+```
+
+It collapses the committed parquet into a per-region table ranked by
+rate-limit pressure (429s / calls) and prints a one-line headline tying
+the worst region to the capital pillars.
+
+## live demo
+
+A one-page Streamlit reader for the committed monthly telemetry: per-region
+table ranked by rate-limit pressure, three top-line metrics, a filter for
+rate-limited regions, and a headline callout. It reads `reports/` directly —
+no network, no secrets.
+
+Run locally:
+
+```bash
+python -m uv run --with streamlit streamlit run streamlit_app.py
+```
+
+Deploy on Streamlit Community Cloud → New app → repo
+`AthenaTheOwl/capital-build-reconciler`, branch `main`, main file
+`streamlit_app.py`.
+
+<!-- live-url: https://… (fill in after first deploy) -->
+
 ## Layout
 
 ```
