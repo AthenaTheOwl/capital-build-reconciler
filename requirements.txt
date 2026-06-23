@@ -1,2 +1,6 @@
 streamlit>=1.40
 pyarrow>=15
+# install this repo (pulls pydantic/pyyaml/jsonschema) so the real engine
+# imports on Streamlit Cloud: capital_reconcile.ingest.helicone.normalize
+# + capital_reconcile.show.region_rows
+.
