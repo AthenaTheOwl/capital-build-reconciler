@@ -104,7 +104,12 @@ def _rate_limit_hit(record: dict[str, Any]) -> bool:
 def iter_records(raw_dir: Path) -> Iterator[dict[str, Any]]:
     for json_path in sorted(raw_dir.glob("*.json")):
         with json_path.open(encoding="utf-8") as handle:
-            payload = json.load(handle)
+            try:
+                payload = json.load(handle)
+            except json.JSONDecodeError as exc:
+                # surface the offending file; iter_records is the only place we
+                # parse raw logs, so callers can report a path instead of a trace
+                raise ValueError(f"{json_path}: not valid JSON: {exc}") from exc
 
         if isinstance(payload, list):
             records = payload

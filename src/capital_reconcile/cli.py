@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from .ingest.helicone import ingest
@@ -13,7 +14,13 @@ _SCHEMAS_DIR = _REPO_ROOT / "schemas"
 
 
 def _ingest(args: argparse.Namespace) -> int:
-    events = ingest(args.raw, args.out)
+    try:
+        events = ingest(args.raw, args.out)
+    except (OSError, ValueError) as exc:
+        # OSError: --raw missing or unreadable; ValueError: a log file is
+        # malformed JSON or holds a non-object record
+        print(f"ingest: {args.raw}: {exc}", file=sys.stderr)
+        return 1
     print(f"wrote {len(events)} normalized events to {args.out}")
     return 0
 
@@ -60,7 +67,12 @@ def _validate_memo(memo: Path) -> int:
     from jsonschema import Draft202012Validator, FormatChecker
 
     schema = json.loads((_SCHEMAS_DIR / "monthly_memo.schema.json").read_text(encoding="utf-8"))
-    text = memo.read_text(encoding="utf-8")
+    try:
+        text = memo.read_text(encoding="utf-8")
+    except OSError as exc:
+        # missing path, a directory, or an unreadable file
+        print(f"validate: {memo}: {exc}")
+        return 1
     if not text.startswith("---\n"):
         print(f"validate: {memo}: missing YAML front matter")
         return 1
