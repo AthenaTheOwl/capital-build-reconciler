@@ -43,7 +43,7 @@ The local-gate chain:
 ```bash
 python -m pytest
 python scripts/voice_lint.py
-python scripts/validate_schemas.py     # validates monthly-memo schema
+python scripts/validate_schemas.py schemas/     # validates monthly-memo schema
 python scripts/validate_pillars.py     # checks every verdict has evidence
 ```
 
