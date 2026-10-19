@@ -90,8 +90,9 @@ different angles:
 - [thesis-pillar-tracker](https://github.com/AthenaTheOwl/thesis-pillar-tracker)
   — holds the standing thesis each pillar is scored against.
 - [earnings-pillar-diff](https://github.com/AthenaTheOwl/earnings-pillar-diff)
-  — reads the same pillars off the public earnings calls, the slow channel this
-  one runs ahead of.
+  — reads the same pillars off the public earnings calls, the kind of
+  independent evidence this repo needs before it ties rate-limit pressure to a
+  pillar.
 
 This repo absorbs the older build-telemetry channel-check sketch.
 
