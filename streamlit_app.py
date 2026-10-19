@@ -2,8 +2,8 @@
 
 Reads the committed monthly telemetry under reports/ (the ingest summary
 jsonl + the normalized parquet it summarizes) and shows which region is
-under the most rate-limit pressure - a capacity signal for the AI-infra
-capital pillars before it lands in public earnings. No network, no
+under the most rate-limit pressure, with sampling uncertainty. Physical
+supply attribution requires separate evidence. No network, no
 secrets - runs entirely off the committed fixture artifacts.
 
 Deploy: Streamlit Community Cloud -> New app -> repo
@@ -28,7 +28,7 @@ if SRC.is_dir() and str(SRC) not in sys.path:
 # the real engine: the field-mapping normalizer + the per-region
 # rate-limit-pressure ranker the CLI `ingest` and `show` verbs drive.
 from capital_reconcile.ingest.helicone import normalize as _normalize  # noqa: E402
-from capital_reconcile.show import region_rows as _region_rows  # noqa: E402
+from capital_reconcile.show import pressure_interval, region_rows as _region_rows  # noqa: E402
 
 FIXTURE = REPO / "tests" / "fixtures" / "helicone_sample.json"
 
@@ -76,6 +76,7 @@ def region_rows(events: list[dict]) -> list[dict]:
                 "calls": agg["calls"],
                 "429s": agg["rate_limit_hits"],
                 "rl_pressure": round(agg["rate_limit_hits"] / calls, 3),
+                "rl_pressure_ci95": pressure_interval(agg["rate_limit_hits"], agg["calls"]),
                 "avg_latency_ms": round(agg["lat"] / calls),
                 "cost_usd": round(agg["cost_usd"], 6),
                 "models": ", ".join(sorted(m.split("-2024")[0] for m in agg["models"])),
@@ -88,8 +89,8 @@ def region_rows(events: list[dict]) -> list[dict]:
 st.set_page_config(page_title="capital-build-reconciler - build telemetry", layout="wide")
 st.title("capital-build-reconciler")
 st.caption(
-    "personal LLM-inference telemetry as a private channel-check: which region is "
-    "throwing rate limits, read as a capacity signal for the AI-infra capital pillars."
+    "personal LLM-inference telemetry: observed service pressure by region. "
+    "429s alone do not establish physical supply constraints."
 )
 
 summary, stem = load_summary()
@@ -121,16 +122,17 @@ if rows and rows[0]["429s"] > 0:
     st.info(
         f"**headline:** {top['region']} carried {top['429s']} of "
         f"{summary.get('rate_limit_hits', sum(r['429s'] for r in rows))} rate-limit hit(s) this month "
-        f"(rl_pressure {top['rl_pressure']:.0%}) - a capacity signal for the foundry / packaging / "
-        f"HBM pillars before it shows up in public earnings."
+        f"(rl_pressure {top['rl_pressure']:.0%}). "
+        "Physical-supply attribution: ABSTAIN pending independent evidence."
     )
 else:
     st.info(
-        "**headline:** no rate-limit hits this month - capacity reads HOLD; "
-        "no pillar upweight signal from telemetry."
+        "**headline:** no rate-limit hits this month - telemetry reads HOLD; "
+        "physical-supply attribution ABSTAIN."
     )
 
 st.caption(
+    "95% Wilson intervals assume independent calls. Retries and bursts can widen uncertainty. "
     "v0.0.2 ships one anthropic fixture month. the model + ingester live in "
     "`src/capital_reconcile/`; this page reads the committed reports/. "
     "repo: github.com/AthenaTheOwl/capital-build-reconciler"
@@ -248,10 +250,10 @@ if st.button("run reconciler", type="primary"):
         st.info(
             f"**headline:** {top['region']} carried {top['rate_limit_hits']} of "
             f"{n_hits} rate-limit hit(s) (rl_pressure {top['rl_pressure']:.0%}) - "
-            "capacity signal: UPWEIGHT the foundry / packaging / HBM pillars."
+            "physical-supply attribution: ABSTAIN pending independent evidence."
         )
     else:
         st.info(
-            "**headline:** no rate-limit hits across your logs - capacity reads "
-            "HOLD; no pillar upweight signal."
+            "**headline:** no rate-limit hits across your logs - telemetry reads "
+            "HOLD; physical-supply attribution ABSTAIN."
         )

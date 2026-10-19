@@ -3,13 +3,14 @@
 No args, read-only, offline. Reads the committed ingest summary
 (``reports/*-ingest-summary.jsonl``) and the normalized parquet it
 summarizes, then prints a per-region table ranked by rate-limit pressure
-plus a one-line headline tying the telemetry to the capital thesis: a
-region throwing 429s is a capacity signal the public narrative is behind on.
+plus a one-line headline separating observed service pressure from unverified
+physical-supply explanations. Rate limits alone do not identify hardware scarcity.
 """
 
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -17,6 +18,26 @@ import pyarrow.parquet as pq
 # repo root is two parents up from src/capital_reconcile/show.py
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _REPORTS_DIR = _REPO_ROOT / "reports"
+
+
+def pressure_interval(hits: int, calls: int) -> tuple[float, float]:
+    """Two-sided 95% Wilson interval, conditional on independent calls.
+
+    Retried or burst-correlated requests violate this assumption; the interval
+    is descriptive and establishes no cause of a rate limit.
+    """
+    if any(not isinstance(n, int) or isinstance(n, bool) for n in (hits, calls)):
+        raise ValueError("hits and calls must be integer counts")
+    if calls < 0 or hits < 0 or hits > calls:
+        raise ValueError("require 0 <= hits <= calls")
+    if calls == 0:
+        return (0.0, 1.0)
+    z = 1.959963984540054
+    p = hits / calls
+    denominator = 1 + z * z / calls
+    center = (p + z * z / (2 * calls)) / denominator
+    half = z * math.sqrt(p * (1 - p) / calls + z * z / (4 * calls * calls)) / denominator
+    return (max(0.0, center - half), min(1.0, center + half))
 
 
 def latest_summary(reports_dir: Path) -> Path | None:
@@ -71,6 +92,7 @@ def region_rows(events: list[dict]) -> list[dict]:
                 "calls": agg["calls"],
                 "rate_limit_hits": agg["rate_limit_hits"],
                 "rl_pressure": round(agg["rate_limit_hits"] / calls, 3),
+                "rl_pressure_ci95": pressure_interval(agg["rate_limit_hits"], agg["calls"]),
                 "avg_latency_ms": round(agg["latency_ms_total"] / calls),
                 "cost_usd": round(agg["cost_usd"], 6),
                 "models": sorted(agg["models"]),
@@ -95,16 +117,18 @@ def render(summary: dict, events: list[dict], stem: str) -> str:
 
     header = (
         f"{'region':<12} {'calls':>5} {'429s':>5} {'rl_pressure':>11} "
-        f"{'avg_latency':>11} {'cost_usd':>10}  models"
+        f"{'95% interval':>13} {'avg_latency':>11} {'cost_usd':>10}  models"
     )
     lines.append(header)
     lines.append("-" * len(header))
     for r in rows:
+        interval = f"{r['rl_pressure_ci95'][0]:.0%}-{r['rl_pressure_ci95'][1]:.0%}"
         lines.append(
             f"{r['region'][:12]:<12} "
             f"{r['calls']:>5} "
             f"{r['rate_limit_hits']:>5} "
             f"{r['rl_pressure']:>11.3f} "
+            f"{interval:>13} "
             f"{r['avg_latency_ms']:>9}ms "
             f"${r['cost_usd']:>9.4f}  "
             f"{', '.join(m.split('-2024')[0] for m in r['models'])}"
@@ -116,14 +140,15 @@ def render(summary: dict, events: list[dict], stem: str) -> str:
         lines.append(
             f"\nheadline: {top['region']} carried {top['rate_limit_hits']} of "
             f"{total_rl} rate-limit hit(s) this month "
-            f"(rl_pressure {top['rl_pressure']:.0%}) - a capacity signal for the "
-            f"foundry / packaging / HBM pillars before it shows up in public earnings."
+            f"(rl_pressure {top['rl_pressure']:.0%}). Observed service pressure; "
+            f"physical-supply attribution ABSTAIN pending independent evidence."
         )
     else:
         lines.append(
             f"\nheadline: no rate-limit hits across {len(rows)} region(s) this month - "
-            f"capacity reads HOLD; no pillar upweight signal from telemetry."
+            f"telemetry reads HOLD; physical-supply attribution ABSTAIN."
         )
+    lines.append("95% Wilson intervals assume independent calls; retries and bursts can widen uncertainty.")
     return "\n".join(lines)
 
 
@@ -148,4 +173,4 @@ def show(reports_dir: Path | None = None) -> int:
     return 0
 
 
-__all__ = ["show", "render", "region_rows", "latest_summary"]
+__all__ = ["show", "render", "region_rows", "latest_summary", "pressure_interval"]
