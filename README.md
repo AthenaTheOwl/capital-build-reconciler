@@ -1,18 +1,16 @@
 # capital-build-reconciler
 
-You ask for tokens in us-east-1 and get a 429. The same region eats the only
-rate-limit hit of the month, half its calls bounced. That bounce is a capacity
-fact about the foundry-to-HBM stack two quarters before it reaches an earnings
-call. This repo writes it down.
+You ask for tokens in us-east-1 and get a 429. The reconciler records the
+observed rate-limit pressure and its sampling uncertainty. The reason for the
+429 remains a separate question.
 
 ## What it does
 
-Your own inference logs are a channel-check nobody else is reading. When the
-region you keep hitting starts refusing tokens, that refusal is upstream of the
-public narrative on foundry, packaging, and memory capacity. The reconciler
-collapses a month of telemetry — calls, 429s, latency, cost per region — into a
-ranked table and a one-line verdict tying the worst region to the capital pillars
-it implies.
+The reconciler collapses a month of inference telemetry — calls, 429s, latency,
+cost per region — into a ranked table with 95% Wilson intervals. Rate limits can
+reflect account quotas, request bursts, or service policy; the logs alone cannot
+identify a foundry, packaging, or memory constraint. Physical-supply attribution
+therefore reads ABSTAIN until independently sourced evidence supports it.
 
 The cadence is monthly. The decision is allocation across six named pillars
 (foundry, packaging, memory, networking, power, cooling). The artifact is one
@@ -33,16 +31,16 @@ python -m capital_reconcile show
 capital-build-reconciler - anthropic build telemetry, 2026-06 (2026-M06-ingest-summary)
 3 call(s) across 2 region(s), ranked by rate-limit pressure (429s / calls)
 
-region       calls  429s rl_pressure avg_latency   cost_usd  models
--------------------------------------------------------------------
-us-east-1        2     1       0.500       481ms $   0.0210  claude-3-5-sonnet
-us-west-2        1     0       0.000       611ms $   0.0042  claude-3-5-haiku
+region       calls  429s rl_pressure  95% interval avg_latency   cost_usd  models
+-----------------------------------------------------------------------------
+us-east-1        2     1       0.500        9%-91%       481ms $   0.0210  claude-3-5-sonnet
+us-west-2        1     0       0.000         0%-79%       611ms $   0.0042  claude-3-5-haiku
 
-headline: us-east-1 carried 1 of 1 rate-limit hit(s) this month (rl_pressure 50%) - a capacity signal for the foundry / packaging / HBM pillars before it shows up in public earnings.
+headline: us-east-1 carried 1 of 1 rate-limit hit(s) this month (rl_pressure 50%). Observed service pressure; physical-supply attribution ABSTAIN pending independent evidence.
 ```
 
-The region at the top of the table is the one refusing you tokens. That's the one
-the headline points the capital pillars at.
+The interval assumes independent calls. Retries and correlated bursts can make
+uncertainty larger. See [the attribution protocol](docs/telemetry-attribution.md).
 
 ## Live demo
 
@@ -123,3 +121,7 @@ capital_reconcile/        written monthly memos land here
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Method update
+
+[October method update: Rate-limit pressure is an observation; hardware attribution needs another test](docs/telemetry-attribution.md).
