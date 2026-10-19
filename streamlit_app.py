@@ -54,6 +54,10 @@ def load_events(summary: dict) -> list[dict]:
     return pq.read_table(candidate).to_pylist()
 
 
+def interval_label(ci: tuple[float, float]) -> str:
+    return f"{ci[0]:.0%}-{ci[1]:.0%}"
+
+
 def region_rows(events: list[dict]) -> list[dict]:
     by_region: dict[str, dict] = {}
     for ev in events:
@@ -76,7 +80,7 @@ def region_rows(events: list[dict]) -> list[dict]:
                 "calls": agg["calls"],
                 "429s": agg["rate_limit_hits"],
                 "rl_pressure": round(agg["rate_limit_hits"] / calls, 3),
-                "rl_pressure_ci95": pressure_interval(agg["rate_limit_hits"], agg["calls"]),
+                "rl_pressure_ci95": interval_label(pressure_interval(agg["rate_limit_hits"], agg["calls"])),
                 "avg_latency_ms": round(agg["lat"] / calls),
                 "cost_usd": round(agg["cost_usd"], 6),
                 "models": ", ".join(sorted(m.split("-2024")[0] for m in agg["models"])),
@@ -240,7 +244,11 @@ if st.button("run reconciler", type="primary"):
 
     st.markdown("**per-region ranking** (real `region_rows`, by rl_pressure)")
     display_rows = [
-        {**r, "models": ", ".join(m.split("-2024")[0] for m in r["models"])}
+        {
+            **r,
+            "rl_pressure_ci95": interval_label(r["rl_pressure_ci95"]),
+            "models": ", ".join(m.split("-2024")[0] for m in r["models"]),
+        }
         for r in user_rows
     ]
     st.dataframe(display_rows, use_container_width=True, hide_index=True)
