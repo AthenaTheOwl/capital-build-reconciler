@@ -120,10 +120,10 @@ schemas/  scripts/  tests/  decisions/  docs/
 capital_reconcile/        written monthly memos land here
 ```
 
-## License
-
-MIT. See [LICENSE](LICENSE).
-
 ## Method update
 
 [October method update: Rate-limit pressure is an observation; hardware attribution needs another test](docs/telemetry-attribution.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
