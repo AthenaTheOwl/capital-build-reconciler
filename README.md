@@ -32,11 +32,12 @@ capital-build-reconciler - anthropic build telemetry, 2026-06 (2026-M06-ingest-s
 3 call(s) across 2 region(s), ranked by rate-limit pressure (429s / calls)
 
 region       calls  429s rl_pressure  95% interval avg_latency   cost_usd  models
------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 us-east-1        2     1       0.500        9%-91%       481ms $   0.0210  claude-3-5-sonnet
-us-west-2        1     0       0.000         0%-79%       611ms $   0.0042  claude-3-5-haiku
+us-west-2        1     0       0.000        0%-79%       611ms $   0.0042  claude-3-5-haiku
 
 headline: us-east-1 carried 1 of 1 rate-limit hit(s) this month (rl_pressure 50%). Observed service pressure; physical-supply attribution ABSTAIN pending independent evidence.
+95% Wilson intervals assume independent calls; retries and bursts can widen uncertainty.
 ```
 
 The interval assumes independent calls. Retries and correlated bursts can make
