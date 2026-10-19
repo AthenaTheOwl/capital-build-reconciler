@@ -11,8 +11,9 @@ tracking AI-infra capital exposure against private build telemetry.
 
 ## Problem
 
-- Public earnings data arrives after capacity stress has already shown
-  up in build telemetry.
+- Build telemetry shows observed rate-limit pressure but cannot by
+  itself say whether that pressure reflects physical capacity; a pillar
+  call needs independent public evidence such as earnings calls.
 - Raw telemetry is too low-level for a capital decision.
 - A monthly verdict needs explicit evidence refs and a revert threshold
   per pillar.
