@@ -7,8 +7,16 @@ def test_sparse_pressure_retains_uncertainty_and_does_not_assert_hardware_cause(
     low, high = pressure_interval(1, 2)
     assert low == pytest.approx(0.0945312, abs=1e-6)
     assert high == pytest.approx(0.9054688, abs=1e-6)
-    output = render({}, [{"region": "r", "rate_limit_hit": True}], "synthetic")
-    assert "attribution ABSTAIN" in output
+    events = [{"region": "r", "rate_limit_hit": True}, {"region": "r", "rate_limit_hit": False}]
+    output = render({}, events, "synthetic")
+    row = next(line for line in output.splitlines() if line.startswith("r "))
+    assert "9%-91%" in row
+    assert (
+        "Observed service pressure; physical-supply attribution ABSTAIN "
+        "pending independent evidence." in output
+    )
+    for phrase in ("foundry", "hbm", "capacity signal", "upweight", "public earnings"):
+        assert phrase not in output.lower()
     assert "95% Wilson" in output
 
 
