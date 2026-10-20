@@ -5,6 +5,7 @@
 - PR 0002 schema, config, and Helicone-style ingest surface is implemented.
 - The package exposes `python -m capital_reconcile ingest` and the `capital-reconcile` console entry.
 - Fixture-driven parquet ingest tests and schema/voice validators are checked in.
+- `scripts/validate_pillars.py` rejects non-ABSTAIN verdicts that cite telemetry or prior memos only; tests cover it.
 - Product brief, system map, and `specs/0002-design/` are checked in.
 - `capital_build_reconciler` exposes the factory-facing `cli`, `model`, and `scoring` modules.
 - `reports/2026-M06-ingest-summary.jsonl` is the checked-in v0.1 report artifact.
@@ -18,9 +19,8 @@
 
 ## Next feature queue
 
-- Implement scorer evidence extraction against `config/pillars.yaml`.
+- Implement scorer telemetry-flag extraction against `config/pillars.yaml` (flags only; verdicts need independent evidence).
 - Add the memo writer for `capital_reconcile/YYYY-Mnn.md` drafts.
-- Add validator tests for under-evidenced verdicts and ABSTAIN handling.
 - Replace the fixture report with a private-telemetry monthly report when raw data is available.
 
 - Resolve factory defect: missing PRODUCT_BRIEF.md,SYSTEM_MAP.md

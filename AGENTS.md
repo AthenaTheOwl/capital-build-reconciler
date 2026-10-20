@@ -20,7 +20,7 @@ the artifact.
 | Role | What they do |
 |---|---|
 | `telemetry-ingester` | Pulls Helicone/Langfuse-style logs into a typed monthly schema |
-| `pillar-scorer` | Maps telemetry deltas onto the 6-pillar rubric |
+| `pillar-scorer` | Turns telemetry deltas into per-pillar flags and ranked intervals; never a verdict on its own |
 | `memo-writer` | Produces the monthly capital_reconcile/<year>-Mnn.md |
 | `revert-tracker` | Re-reads last 6 memos; flags pillars whose revert threshold tripped |
 
@@ -33,8 +33,9 @@ These roles exist in spec ledger; not all are implemented in v0.
 - No marketing jargon. Verdict language stays literal.
 - No antithetical-reversal structure. Each pillar verdict is a single
   flat claim plus the evidence behind it.
-- Honest about uncertainty. If three months of telemetry is too thin
-  to score a pillar, the memo says so and abstains.
+- Honest about uncertainty. Telemetry alone never scores a pillar: a
+  rate-limit hit can come from quotas, bursts or service policy. Without
+  independent evidence the memo says so and abstains.
 
 ## Gates
 
@@ -52,7 +53,8 @@ yet, so the command fails (missing file, exit 1) until the first
 `capital_reconcile/<year>-Mnn.md` lands; skip it until then.
 
 The pillar-validator gate is the load-bearing one. A monthly memo
-without an evidence reference per pillar verdict does not merge.
+without two evidence references per pillar verdict, at least one of
+them independent of this repo's telemetry, does not merge.
 
 ## Out of scope
 

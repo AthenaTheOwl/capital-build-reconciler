@@ -37,5 +37,8 @@ before the memo writer lands.
 ## Boundary
 
 The v0.1 report is descriptive. It does not assign pillar verdicts.
-Verdicts remain in the future memo workflow, where the evidence policy
-validators already exist.
+Its rate-limit counts are telemetry flags; they cannot attribute a
+foundry, packaging or memory constraint. Verdicts remain in the future
+memo workflow, where the evidence policy validators already exist and
+require independent evidence for any non-ABSTAIN call (R-CBR-003,
+R-CBR-011).

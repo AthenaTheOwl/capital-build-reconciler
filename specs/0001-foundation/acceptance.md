@@ -3,7 +3,7 @@
 "v0 done" means the repo can ingest one month of Helicone-style
 telemetry, emit a draft memo whose YAML front-matter validates against
 the canonical schema, and produce a validator chain that catches a
-missing-evidence pillar verdict.
+missing-evidence pillar verdict or one resting on telemetry alone.
 
 ## Commands a reviewer must be able to run
 
@@ -31,7 +31,9 @@ python -m capital_reconcile validate \
 - `python scripts/validate_schemas.py capital_reconcile/2026-M06.md`
   exits 0.
 - `python scripts/validate_pillars.py capital_reconcile/2026-M06.md`
-  exits 0 — every non-ABSTAIN verdict has at least two evidence refs.
+  exits 0 — every non-ABSTAIN verdict has at least two evidence refs,
+  at least one of them independent of this repo's telemetry and prior
+  memos (R-CBR-003, R-CBR-011).
 
 ## Artifacts that must exist
 
@@ -53,6 +55,7 @@ python -m capital_reconcile validate \
 ## What "done" feels like
 
 A reader picks up `capital_reconcile/2026-M06.md` and learns, in under
-two minutes, six pillar verdicts and the telemetry behind each. They
-can re-run the validator chain on the file and watch every gate pass.
+two minutes, six pillar verdicts, the independent evidence behind each
+non-ABSTAIN call, and the telemetry flags that sit beside it. They can
+re-run the validator chain on the file and watch every gate pass.
 That is enough.

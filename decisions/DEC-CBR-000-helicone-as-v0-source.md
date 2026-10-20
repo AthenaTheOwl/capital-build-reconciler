@@ -4,8 +4,9 @@ Status: accepted
 
 ## Context
 
-The reconciler needs one telemetry source before it can score monthly
-pillar evidence. Helicone-style exports are JSON, easy to fixture, and
+The reconciler needs one telemetry source before it can flag monthly
+pillar candidates. Telemetry raises flags only; pillar verdicts need
+independent evidence. Helicone-style exports are JSON, easy to fixture, and
 close to the fields named in R-CBR-005.
 
 ## Decision

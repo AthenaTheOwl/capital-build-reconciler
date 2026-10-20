@@ -12,7 +12,12 @@ Brand prefix: CBR (capital-build-reconciler).
   networking, power, cooling.
 - **R-CBR-003** — Each pillar verdict SHALL be one of HOLD, UPWEIGHT,
   TRIM, ABSTAIN. ABSTAIN is required when fewer than two evidence
-  items exist for the pillar in the scoring window.
+  items exist for the pillar in the scoring window, or when none of
+  them is independent evidence. Independent evidence is sourced outside
+  this repo's own telemetry and prior memos (for example a public
+  earnings call or supplier disclosure). Telemetry refs (rate-limit
+  hits, latency, cost) may sit in a pillar's evidence list as flags but
+  never by themselves support a non-ABSTAIN verdict.
 - **R-CBR-004** — Telemetry ingest SHALL accept Helicone-style JSON
   log exports as the v0 source. Adapters for Langfuse and
   Anthropic-native logs are deferred to spec 0002.
@@ -29,8 +34,14 @@ Brand prefix: CBR (capital-build-reconciler).
   matching `schemas/monthly_memo.schema.json`. The CLI reads the
   YAML; the human reads the prose; both must agree.
 - **R-CBR-008** — Each verdict SHALL carry an explicit revert
-  threshold (e.g., "TRIM if foundry-capacity rate-limit hits drop
-  below 5/month for two consecutive months").
+  threshold. Rate-limit pressure and other telemetry MAY raise a flag
+  or a ranked interval inside a threshold (e.g., "flag for review if
+  us-east-1 rate-limit pressure stays above 20% for two consecutive
+  months"), but a threshold that moves a pillar verdict SHALL name
+  independent evidence (e.g., "TRIM if two consecutive public earnings
+  calls report N3 utilization below 80%"). Telemetry alone does not
+  identify a foundry, packaging or memory constraint; without
+  independent evidence the pillar reads ABSTAIN.
 
 ## Voice requirements
 
@@ -42,6 +53,15 @@ Brand prefix: CBR (capital-build-reconciler).
 
 - **R-CBR-011** — `scripts/validate_pillars.py` SHALL reject any memo
   in which a non-ABSTAIN verdict carries fewer than two evidence
-  references.
+  references, or carries no independent evidence reference (telemetry
+  and prior-memo refs only).
 - **R-CBR-012** — `scripts/validate_schemas.py` SHALL validate every
   memo's YAML front-matter against the canonical schema before merge.
+
+## Traceability
+
+| Requirement | Implementation | Tests |
+|---|---|---|
+| R-CBR-003 | `scripts/validate_pillars.py` (`is_independent_ref`, `validate`) | `tests/test_validate_pillars.py` |
+| R-CBR-008 | `specs/0001-foundation/design.md` schema sketch; `src/capital_reconcile/show.py` and `streamlit_app.py` headlines (flag and interval only, attribution ABSTAIN) | `tests/test_validate_pillars.py::test_design_schema_sketch_passes_pillar_validator`, `tests/test_show.py`, `tests/test_telemetry_uncertainty.py` |
+| R-CBR-011 | `scripts/validate_pillars.py` | `tests/test_validate_pillars.py` |
