@@ -42,7 +42,10 @@ def test_render_headline_when_no_rate_limits() -> None:
     events = [{"region": "us-west-2", "rate_limit_hit": False, "cost_usd": 0.004, "latency_ms": 600, "model": "m"}]
     out = render(summary, events, "stem")
     assert "no rate-limit hits" in out
-    assert "HOLD" in out
+    # telemetry alone never yields a pillar verdict, quiet month or not
+    for verdict in ("HOLD", "UPWEIGHT", "TRIM"):
+        assert verdict not in out
+    assert "physical-supply attribution ABSTAIN pending independent evidence" in out
 
 
 def test_show_reads_committed_artifacts(capsys) -> None:

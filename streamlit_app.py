@@ -131,8 +131,8 @@ if rows and rows[0]["429s"] > 0:
     )
 else:
     st.info(
-        "**headline:** no rate-limit hits this month - telemetry reads HOLD; "
-        "physical-supply attribution ABSTAIN."
+        "**headline:** no rate-limit hits this month. No observed service pressure; "
+        "physical-supply attribution ABSTAIN pending independent evidence."
     )
 
 st.caption(
@@ -262,6 +262,6 @@ if st.button("run reconciler", type="primary"):
         )
     else:
         st.info(
-            "**headline:** no rate-limit hits across your logs - telemetry reads "
-            "HOLD; physical-supply attribution ABSTAIN."
+            "**headline:** no rate-limit hits across your logs. No observed service "
+            "pressure; physical-supply attribution ABSTAIN pending independent evidence."
         )

@@ -59,3 +59,12 @@ def test_streamlit_app_uses_shared_interval_label():
         if isinstance(node, ast.Call) and getattr(node.func, "id", None) == "interval_label"
     ]
     assert len(calls) >= 2  # synthetic-sample table and uploaded-telemetry table
+
+
+def test_streamlit_headlines_emit_no_verdict_from_telemetry():
+    from pathlib import Path
+
+    app = (Path(__file__).resolve().parents[1] / "streamlit_app.py").read_text()
+    for verdict in ("HOLD", "UPWEIGHT", "TRIM"):
+        assert verdict not in app
+    assert app.count("ABSTAIN pending independent evidence") >= 4

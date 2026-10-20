@@ -7,6 +7,33 @@ from typing import Any
 import yaml
 
 
+# Evidence refs that point at this repo's own telemetry (raw or normalized
+# logs, report artifacts). Telemetry can raise a flag or a ranked interval for
+# a pillar; it cannot by itself support a pillar verdict (R-CBR-003, R-CBR-011).
+TELEMETRY_PREFIXES: tuple[str, ...] = ("data/raw/", "data/normalized/", "reports/")
+TELEMETRY_SUFFIXES: tuple[str, ...] = (".parquet", ".jsonl")
+# Prior monthly memos restate earlier calls; they are not independent evidence.
+MEMO_PREFIX = "capital_reconcile/"
+
+
+def _ref_path(ref: str) -> str:
+    path = ref.split("#", 1)[0].strip()
+    while path.startswith("./"):
+        path = path[2:]
+    return path
+
+
+def is_telemetry_ref(ref: str) -> bool:
+    path = _ref_path(ref)
+    return path.startswith(TELEMETRY_PREFIXES) or path.endswith(TELEMETRY_SUFFIXES)
+
+
+def is_independent_ref(ref: str) -> bool:
+    """True for evidence sourced outside this repo's telemetry and memos."""
+    path = _ref_path(ref)
+    return bool(path) and not is_telemetry_ref(ref) and not path.startswith(MEMO_PREFIX)
+
+
 def _front_matter(path: Path) -> dict[str, Any]:
     text = path.read_text(encoding="utf-8")
     if not text.startswith("---\n"):
@@ -40,10 +67,19 @@ def validate(path: Path) -> list[str]:
             errors.append(f"{path}:{key}: evidence is not a list")
             continue
 
-        if verdict == "ABSTAIN" and len(evidence) >= 2:
-            errors.append(f"{path}:{key}: ABSTAIN has enough evidence for a verdict")
-        elif verdict != "ABSTAIN" and len(evidence) < 2:
+        independent = [ref for ref in evidence if is_independent_ref(str(ref))]
+        if verdict == "ABSTAIN":
+            # telemetry flags may ride along with an ABSTAIN; only a pillar
+            # with enough evidence including an independent source must call it
+            if len(evidence) >= 2 and independent:
+                errors.append(f"{path}:{key}: ABSTAIN has enough evidence for a verdict")
+        elif len(evidence) < 2:
             errors.append(f"{path}:{key}: {verdict} needs at least two evidence refs")
+        elif not independent:
+            errors.append(
+                f"{path}:{key}: {verdict} cites telemetry or prior memos only; "
+                "a pillar verdict needs independent evidence, otherwise ABSTAIN"
+            )
     return errors
 
 

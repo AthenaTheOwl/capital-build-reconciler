@@ -150,8 +150,9 @@ def render(summary: dict, events: list[dict], stem: str) -> str:
         )
     else:
         lines.append(
-            f"\nheadline: no rate-limit hits across {len(rows)} region(s) this month - "
-            f"telemetry reads HOLD; physical-supply attribution ABSTAIN."
+            f"\nheadline: no rate-limit hits across {len(rows)} region(s) this month. "
+            f"No observed service pressure; physical-supply attribution ABSTAIN "
+            f"pending independent evidence."
         )
     lines.append("95% Wilson intervals assume independent calls; retries and bursts can widen uncertainty.")
     return "\n".join(lines)
