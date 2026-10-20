@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from capital_reconcile.cli import main
@@ -64,3 +65,11 @@ def test_show_missing_reports_returns_one(tmp_path: Path, capsys) -> None:
     rc = show(tmp_path)
     assert rc == 1
     assert "no ingest summary" in capsys.readouterr().out
+
+
+def test_readme_show_sample_matches_show_output(capsys) -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    blocks = re.findall(r"^```[^\n]*\n(.*?)^```", readme, flags=re.S | re.M)
+    sample = next(b for b in blocks if "headline:" in b)
+    assert show(REPORTS) == 0
+    assert capsys.readouterr().out == sample

@@ -28,7 +28,11 @@ if SRC.is_dir() and str(SRC) not in sys.path:
 # the real engine: the field-mapping normalizer + the per-region
 # rate-limit-pressure ranker the CLI `ingest` and `show` verbs drive.
 from capital_reconcile.ingest.helicone import normalize as _normalize  # noqa: E402
-from capital_reconcile.show import pressure_interval, region_rows as _region_rows  # noqa: E402
+from capital_reconcile.show import (  # noqa: E402
+    interval_label,
+    pressure_interval,
+    region_rows as _region_rows,
+)
 
 FIXTURE = REPO / "tests" / "fixtures" / "helicone_sample.json"
 
@@ -76,7 +80,7 @@ def region_rows(events: list[dict]) -> list[dict]:
                 "calls": agg["calls"],
                 "429s": agg["rate_limit_hits"],
                 "rl_pressure": round(agg["rate_limit_hits"] / calls, 3),
-                "rl_pressure_ci95": pressure_interval(agg["rate_limit_hits"], agg["calls"]),
+                "rl_pressure_ci95": interval_label(pressure_interval(agg["rate_limit_hits"], agg["calls"])),
                 "avg_latency_ms": round(agg["lat"] / calls),
                 "cost_usd": round(agg["cost_usd"], 6),
                 "models": ", ".join(sorted(m.split("-2024")[0] for m in agg["models"])),
@@ -240,7 +244,11 @@ if st.button("run reconciler", type="primary"):
 
     st.markdown("**per-region ranking** (real `region_rows`, by rl_pressure)")
     display_rows = [
-        {**r, "models": ", ".join(m.split("-2024")[0] for m in r["models"])}
+        {
+            **r,
+            "rl_pressure_ci95": interval_label(r["rl_pressure_ci95"]),
+            "models": ", ".join(m.split("-2024")[0] for m in r["models"]),
+        }
         for r in user_rows
     ]
     st.dataframe(display_rows, use_container_width=True, hide_index=True)

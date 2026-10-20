@@ -42,10 +42,14 @@ The local-gate chain:
 
 ```bash
 python -m pytest
-python scripts/voice_lint.py
+python scripts/voice_lint.py README.md AGENTS.md docs
 python scripts/validate_schemas.py schemas/     # validates monthly-memo schema
-python scripts/validate_pillars.py     # checks every verdict has evidence
+# python scripts/validate_pillars.py capital_reconcile/<year>-Mnn.md   # once a memo exists; checks every verdict has evidence
 ```
+
+`validate_pillars.py` takes one or more memo paths. No memo is committed
+yet, so the command fails (missing file, exit 1) until the first
+`capital_reconcile/<year>-Mnn.md` lands; skip it until then.
 
 The pillar-validator gate is the load-bearing one. A monthly memo
 without an evidence reference per pillar verdict does not merge.
