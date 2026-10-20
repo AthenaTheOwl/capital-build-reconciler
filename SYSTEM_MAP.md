@@ -29,7 +29,8 @@ human-reviewed monthly memo
   names and delegates ingest to the working implementation.
 - `scripts/validate_schemas.py` checks JSON Schema files and memo front
   matter.
-- `scripts/validate_pillars.py` enforces evidence count policy.
+- `scripts/validate_pillars.py` enforces evidence count policy and
+  rejects non-ABSTAIN verdicts that cite telemetry alone.
 - `scripts/voice_lint.py` enforces memo voice constraints.
 - `reports/2026-M06-ingest-summary.jsonl` is the checked-in v0.1 report
   artifact.
@@ -37,5 +38,6 @@ human-reviewed monthly memo
 ## Ownership Boundaries
 
 - The ingester owns telemetry normalization only.
-- Scoring helpers own aggregate summaries and evidence candidates.
+- Scoring helpers own aggregate summaries and telemetry flags. They do
+  not attribute pillars; that needs independent evidence.
 - The memo writer remains future work; final verdicts stay human-owned.

@@ -18,12 +18,15 @@ Ordered for the first three PRs after the v0 scaffold.
 ## PR 0003 — scorer and memo-writer skeleton
 
 - [ ] Implement `src/capital_reconcile/score/rubric.py` that maps
-      normalized events onto per-pillar evidence references.
+      normalized events onto per-pillar telemetry flags and ranked
+      intervals. It never emits a pillar verdict; drafts default to
+      ABSTAIN until the operator adds independent evidence (R-CBR-008).
 - [ ] Implement `src/capital_reconcile/memo/writer.py` that emits a
       draft `capital_reconcile/YYYY-Mnn.md` with TODO verdicts.
 - [ ] Write `tests/test_ingest_helicone.py` against a fixture export.
-- [ ] Write `tests/test_validate_pillars.py` covering the
-      under-evidence ABSTAIN rule.
+- [x] Write `tests/test_validate_pillars.py` covering the
+      under-evidence and telemetry-only ABSTAIN rules (R-CBR-003,
+      R-CBR-011).
 - [ ] Document the operator workflow in `docs/operator-workflow.md`.
 
 ## PR 0004 — first real monthly memo
@@ -31,7 +34,8 @@ Ordered for the first three PRs after the v0 scaffold.
 - [ ] Backfill last 30 days of Helicone exports into
       `data/raw/anthropic/`.
 - [ ] Run the full ingest → score → draft pipeline for 2026-M06.
-- [ ] Hand-edit verdicts and revert thresholds.
+- [ ] Hand-edit verdicts and revert thresholds; cite independent
+      evidence for every non-ABSTAIN pillar.
 - [ ] Land `capital_reconcile/2026-M06.md`.
 - [ ] Add a `decisions/DEC-CBR-001-pillar-set.md` recording why these
       six pillars and not others.

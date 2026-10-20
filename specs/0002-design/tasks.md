@@ -15,6 +15,6 @@
 
 - Add memo writer modules that turn a summary report into a draft
   `capital_reconcile/YYYY-Mnn.md`.
-- Add validator tests for ABSTAIN and under-evidenced non-ABSTAIN
-  verdicts.
+- [x] Add validator tests for ABSTAIN and under-evidenced non-ABSTAIN
+  verdicts, including telemetry-only evidence.
 - Add a real June 2026 memo only after private raw telemetry is present.
