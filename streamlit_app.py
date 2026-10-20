@@ -28,7 +28,11 @@ if SRC.is_dir() and str(SRC) not in sys.path:
 # the real engine: the field-mapping normalizer + the per-region
 # rate-limit-pressure ranker the CLI `ingest` and `show` verbs drive.
 from capital_reconcile.ingest.helicone import normalize as _normalize  # noqa: E402
-from capital_reconcile.show import pressure_interval, region_rows as _region_rows  # noqa: E402
+from capital_reconcile.show import (  # noqa: E402
+    interval_label,
+    pressure_interval,
+    region_rows as _region_rows,
+)
 
 FIXTURE = REPO / "tests" / "fixtures" / "helicone_sample.json"
 
@@ -52,10 +56,6 @@ def load_events(summary: dict) -> list[dict]:
             return []
         candidate = parquets[-1]
     return pq.read_table(candidate).to_pylist()
-
-
-def interval_label(ci: tuple[float, float]) -> str:
-    return f"{ci[0]:.0%}-{ci[1]:.0%}"
 
 
 def region_rows(events: list[dict]) -> list[dict]:

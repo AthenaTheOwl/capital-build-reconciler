@@ -20,6 +20,11 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _REPORTS_DIR = _REPO_ROOT / "reports"
 
 
+def interval_label(ci: tuple[float, float]) -> str:
+    """Format a (low, high) interval as a whole-percent range, e.g. '9%-91%'."""
+    return f"{ci[0]:.0%}-{ci[1]:.0%}"
+
+
 def pressure_interval(hits: int, calls: int) -> tuple[float, float]:
     """Two-sided 95% Wilson interval, conditional on independent calls.
 
@@ -122,7 +127,7 @@ def render(summary: dict, events: list[dict], stem: str) -> str:
     lines.append(header)
     lines.append("-" * len(header))
     for r in rows:
-        interval = f"{r['rl_pressure_ci95'][0]:.0%}-{r['rl_pressure_ci95'][1]:.0%}"
+        interval = interval_label(r["rl_pressure_ci95"])
         lines.append(
             f"{r['region'][:12]:<12} "
             f"{r['calls']:>5} "
